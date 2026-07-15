@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Image Trial Test</title>
+
+  <script src="https://unpkg.com/jspsych@8.2.2"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.1.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.1.0"></script>
+
+  <link href="https://unpkg.com/jspsych@8.2.2/css/jspsych.css" rel="stylesheet" type="text/css">
+</head>
+
+<body></body>
+
+<script>
+  const jsPsych = initJsPsych();
+  const trial = [];
+
+  const frameCount = 30;
+  const frameDuration = 200;
+  const blankDuration = 300;
+  
+  for (let i = 1; i <= frameCount; i++) {
+    const fileNumber = String(i).padStart(2, '0');
+    const imagePath = `stimuli/black_white_${fileNumber}.png`;
+    
+    const frame = {
+      type: jsPsychImageKeyboardResponse,
+      stimulus: imagePath,
+      choices: [' '],
+      response_ends_trial: false,
+      trial_duration: frameDuration,
+      stimulus_width: 800
+    };
+
+    const blank = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: '<p style="font-size: 48px;">+</p>',
+      choices: [' '],
+      response_ends_trial: false,
+      trial_duration: blankDuration
+    };
+
+    trial.push(frame);
+    trial.push(blank);
+  }
+
+  jsPsych.run(trial);
+</script>
+</html>
