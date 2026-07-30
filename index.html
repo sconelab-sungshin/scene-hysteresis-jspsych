@@ -8,38 +8,162 @@
   <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.1.0"></script>
   <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.1.0"></script>
 
-  <link href="https://unpkg.com/jspsych@8.2.2/css/jspsych.css" rel="stylesheet" type="text/css">
+  <link
+    href="https://unpkg.com/jspsych@8.2.2/css/jspsych.css"
+    rel="stylesheet"
+    type="text/css"
+  >
 </head>
 
 <body></body>
 
 <script>
   const jsPsych = initJsPsych();
+
   const trial = [];
 
   const frameCount = 30;
   const frameDuration = 200;
   const blankDuration = 300;
+
   
+  let responded = false;
+
+  
+
+  function showResponseFeedback() {
+    const feedback = document.createElement('div');
+
+    feedback.id = 'response-feedback';
+    feedback.textContent = 'RESPONSE RECORDED';
+
+    Object.assign(feedback.style, {
+      position: 'fixed',
+      bottom: '10%',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      fontSize: '28px',
+      fontWeight: 'bold',
+      color: 'black',
+      zIndex: '9999'
+    });
+
+    document.body.appendChild(feedback);
+
+
+    setTimeout(() => {
+      feedback.remove();
+    }, 3000);
+  }
+
+  
+
+  function addFeedbackKeyListener() {
+    const keyHandler = function(event) {
+      if (
+        event.code === 'Space' &&
+        event.repeat === false &&
+        responded === false
+      ) {
+        responded = true;
+        showResponseFeedback();
+      }
+    };
+
+    document.addEventListener('keydown', keyHandler);
+
+    return keyHandler;
+  }
+
   for (let i = 1; i <= frameCount; i++) {
     const fileNumber = String(i).padStart(2, '0');
     const imagePath = `stimuli/black_white_${fileNumber}.png`;
-    
+
+   
+
+    let frameKeyHandler = null;
+
     const frame = {
       type: jsPsychImageKeyboardResponse,
+
       stimulus: imagePath,
-      choices: [' '],
+
+      choices: function() {
+        return responded ? 'NO_KEYS' : [' '];
+      },
+
       response_ends_trial: false,
       trial_duration: frameDuration,
-      stimulus_width: 800
+      stimulus_width: 800,
+
+      data: {
+        screen_type: 'image',
+        frame_number: i,
+        image_path: imagePath
+      },
+
+      on_load: function() {
+        if (responded === false) {
+          frameKeyHandler = addFeedbackKeyListener();
+        }
+      },
+
+      on_finish: function(data) {
+        if (frameKeyHandler !== null) {
+          document.removeEventListener(
+            'keydown',
+            frameKeyHandler
+          );
+        }
+
+        data.response_recorded = data.response !== null;
+      }
     };
+
+    
+
+    let blankKeyHandler = null;
 
     const blank = {
       type: jsPsychHtmlKeyboardResponse,
-      stimulus: '<p style="font-size: 48px;">+</p>',
-      choices: [' '],
+
+      stimulus: `
+        <p style="
+          font-size: 48px;
+          margin: 0;
+        ">
+          +
+        </p>
+      `,
+
+      choices: function() {
+        return responded ? 'NO_KEYS' : [' '];
+      },
+
       response_ends_trial: false,
-      trial_duration: blankDuration
+      trial_duration: blankDuration,
+
+      data: {
+        screen_type: 'blank',
+        preceding_frame_number: i
+      },
+
+      on_load: function() {
+        if (responded === false) {
+          blankKeyHandler = addFeedbackKeyListener();
+        }
+      },
+
+      on_finish: function(data) {
+        if (blankKeyHandler !== null) {
+          document.removeEventListener(
+            'keydown',
+            blankKeyHandler
+          );
+        }
+
+        data.response_recorded = data.response !== null;
+      }
     };
 
     trial.push(frame);
