@@ -57,7 +57,8 @@
     var rep_per_seq = 5;
     var img_dur = 1200;
     var isi_dur = 400;
-    var iti_dur = 800;
+    var iti_dur1 = 1600;
+    var iti_dur2 = 800;
     var trial_per_block = 10
 
     // 2. Make basic condition matrix
@@ -263,12 +264,19 @@
         }
     };
     // 3-3. ITI display
-    var iti = {
+    var iti1 = {
         type: jsPsychHtmlKeyboardResponse,
-        stimulus: '<p style="font-size: 48px;">+</p>',
+        stimulus: '<p style="font-size: 48px; color: grey;">+</p>',
         choices: "NO_KEYS",
-        trial_duration: iti_dur,
-        data: {disp_type: 'ITI'}
+        trial_duration: iti_dur1,
+        data: {disp_type: 'ITI1'}
+    };
+    var iti2 = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '<p style="font-size: 48px; color: red;">+</p>',
+        choices: "NO_KEYS",
+        trial_duration: iti_dur2,
+        data: {disp_type: 'ITI2'}
     };
     // 3-4. Organize displays
     var image_and_isi = { 
@@ -278,7 +286,7 @@
     };
     for(r=1; r<=exp_blocks.length; r++){
         this['block'+(r)] = {
-            timeline: [image_and_isi, iti],
+            timeline: [image_and_isi, iti1, iti2],
             timeline_variables: exp_blocks[r],
             randomize_order: false
         }
@@ -462,18 +470,20 @@
 
     // ** timeline ** //
     timeline = [];  
-    timeline.push({
-        type: jsPsychFullscreen,
-        fullscreen_mode: true,
-        delay_after: 0,
-        data: {disp_type: 'fullscreen-in'}
-    });
+    // timeline.push({
+    //     type: jsPsychFullscreen,
+    //     fullscreen_mode: true,
+    //     delay_after: 0,
+    //     data: {disp_type: 'fullscreen-in'}
+    // });
     timeline.push(preload_images);
     // timeline.push(consent);
     // timeline.push(demographic_page);
-    // timeline.push(instruction_welcome);
-    // timeline.push(instruction_prac);
-    // timeline.push(instruction_main);
+    timeline.push(instruction_welcome);
+    timeline.push(instruction_prac);
+    timeline.push(instruction_main);
+    timeline.push(iti1);
+    timeline.push(iti2);
     timeline.push(block1);
     timeline.push(break1);
     timeline.push(block2);
