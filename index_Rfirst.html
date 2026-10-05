@@ -49,17 +49,17 @@
     var first_attribute = 'recognition'; // index_Afirst에서는 바꿔야 함. 
     var second_attribute = 'action';        
     var sub_attributes = {
-        recognition: ['foliage_flower', 'pristine_aged'],
-        action: ['soil_ice', 'damp_dry']
+        recognition: ['foliage_flower', 'stone_wood', 'cloudy_sunny'],
+        action: ['soil_ice', 'dry_damp', 'walkable_notwalkable']
     };
     var history_dir = ['AtoB', 'BtoA', 'random'];    
     var img_per_seq = 9;
-    var rep_per_seq = 5;
+    var rep_per_seq = 3;
     var img_dur = 1200;
-    var isi_dur = 400;
+    var isi_dur = 800;
     var iti_dur1 = 1600;
     var iti_dur2 = 800;
-    var trial_per_block = 10
+    var trial_per_block = 9
 
     // 2. Make basic condition matrix
     var condition_matrix = {};
@@ -122,11 +122,11 @@
         // chunk trials
         condition_matrix_final[attr] = {
             non_random: [
-                non_random.slice(0, 10),
-                non_random.slice(10, 20)
+                non_random.slice(0, 9),
+                non_random.slice(9, 18)
             ],
             random: [
-                random.slice(0, 10)
+                random.slice(0, 9)
             ]
         };
     }
@@ -159,8 +159,8 @@
     // 1. Preload images 
     var images = [];
     var stim_folders = {
-        recognition: ['foliage_flower', 'pristine_aged'],
-        action: ['soil_ice', 'dry_damp']
+        recognition: ['foliage_flower', 'stone_wood', 'cloudy_sunny'],
+        action: ['soil_ice', 'dry_damp', 'walkable_notwalkable']
     };    
     for (var attribute in stim_folders) {
         for (var sub_attribute of stim_folders[attribute]) {
@@ -287,7 +287,7 @@
     for(r=1; r<=exp_blocks.length; r++){
         this['block'+(r)] = {
             timeline: [image_and_isi, iti1, iti2],
-            timeline_variables: exp_blocks[r],
+            timeline_variables: exp_blocks[r-1],
             randomize_order: false
         }
     }
@@ -489,6 +489,8 @@
     timeline.push(block2);
     timeline.push(break2);
     timeline.push(block3);
+    timeline.push(break3);
+    timeline.push(block4);
     timeline.push(break4);
     timeline.push(block5);
     timeline.push(break5);
