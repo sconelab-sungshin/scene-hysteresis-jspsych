@@ -49,7 +49,7 @@
     var first_attribute = 'action'; // index_Afirst에서는 바꿔야 함. 
     var second_attribute = 'recognition';        
     var sub_attributes = {
-        recognition: ['foliage_flower', 'wood_stone', 'cloud_bluesky'],
+        recognition: ['foliage_flower', 'wood_stone', 'cloudy_sunny'],
         action: ['soil_ice', 'dry_damp', 'walkable_notwalkable']
     };
     var history_dir = ['AtoB', 'BtoA', 'random'];    
@@ -201,7 +201,7 @@
     // 1. Preload images 
     var images = [];
     var stim_folders = {
-        recognition: ['foliage_flower', 'wood_stone', 'cloud_bluesky'],
+        recognition: ['foliage_flower', 'wood_stone', 'cloudy_sunny'],
         action: ['soil_ice', 'dry_damp', 'walkable_notwalkable']
     };    
     for (var attribute in stim_folders) {
