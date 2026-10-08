@@ -179,7 +179,7 @@
         // second attribute: non-random
         condition_matrix_final[second_attribute].non_random[0],
         condition_matrix_final[second_attribute].non_random[1],
-        // first_attribute:random
+        // random
         condition_matrix_final[first_attribute].random[0],
         condition_matrix_final[second_attribute].random[0],
     ]
@@ -234,56 +234,31 @@
         stimulus: `
             <div style="max-width:1000px; margin:20px 50px; text-align:center; font-family:Arial, sans-serif;">
                 <h1 style="font-size:50px; font-weight:bold;">Welcome to the Study!</h1>
-                <p>In this study, you will view a series of images and make a judgment about each image.
-
-Each image will appear briefly on the screen. Please respond to every image by pressing either the E or I key, according to the response options shown on the screen.
-
-Please respond based on your immediate impression of each image. There are no right or wrong answers.
-
-Try to respond as accurately as possible while the image is displayed.
-</p>
+                <p>In this study, you will view a series of images and judge each one by pressing E or I. 
+                    <br>The response options will be shown on the screen.
+                </p>
+                <p>Images will appear rapidly. Please respond while each image is on the screen, based on your immediate impression.
+                    <br>There are no right or wrong answers.
+                </p>
                 </div>
-                <p style="font-size:22px;"> Click the button below to proceed </p>
+                <p> Click the button below to start the practice session.</p>
             </div>`,
         choices: ['Proceed'],
         data: {disp_type: 'instruction_welcome'}
-    }   
-    var instruction_prac = {
-        type: jsPsychHtmlButtonResponse,
-        stimulus: `
-            <div style="max-width:1000px; margin:20px 50px; text-align:center; font-family:Arial, sans-serif;">
-                <h1 style="font-size:50px; font-weight:bold;">Practice Trials</h1>
-                <p>Before the main experiment, you will complete a short practice session.
-
-A series of images will be presented one at a time. For each image, choose the option that best matches your judgment by pressing the corresponding E or I key.
-
-The response options will be shown below each image.
-
-Please keep your fingers near the E and I keys and try to respond while each image is displayed.
-
-The practice trials are intended to help you become familiar with the task and response keys.
-</p>
-                </div>
-                <p style="font-size:22px;"> Click the button below to begin </p>
-            </div>`,
-        choices: ['Start'],
-        data: {disp_type: 'instruction_practice'}
-    } 
+    }
+    
     var instruction_main = {
         type: jsPsychHtmlButtonResponse,
         stimulus: `
             <div style="max-width:1000px; margin:20px 50px; text-align:center; font-family:Arial, sans-serif;">
                 <h1 style="font-size:50px; font-weight:bold;">Main Trials</h1>
                 <p>The main experiment will now begin.
-
-As in the practice session, images will be presented one at a time. For each image, press the E or I key according to the response options shown below the image.
-
-Please judge each image based on your immediate impression and respond while the image is displayed.
-
-There will be short breaks between rounds. Please remain focused throughout each round.
-
-Click the button below when you are ready to begin.
-</p>
+                  <br>As in the practice session, images will be presented one at a time. 
+                  <br>For each image, press the E or I key according to the response options shown below the image.
+                </p>
+                <p>Please judge each image based on your immediate impression and respond while the image is displayed.
+                    <br>There will be short breaks between rounds. Please remain focused throughout each round.
+                <p>
                 </div>
                 <p style="font-size:22px;"> Click the button below to begin </p>
             </div>`,
@@ -384,7 +359,39 @@ Click the button below when you are ready to begin.
         trial_duration: iti_dur2,
         data: {disp_type: 'ITI2'}
     };
-    // 3-4. Organize displays
+
+    // 3-4. Trial-specific instruction
+    var instruction_trial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: function() {
+            var att1 = jsPsych.timelineVariable('sub_att1');
+            var att2 = jsPsych.timelineVariable('sub_att2');
+
+            return `
+                <div style="text-align:center; font-family:Arial;">
+                    <p style="font-size:22px;">
+                        Judge whether each image looks more like
+                    </p>
+                    <p style="font-size:22px;">
+                        <b>${att1.toUpperCase()} (E) </b>
+                        <br>or
+                        <br><b>${att2.toUpperCase()} (I)</b>
+                    </p>
+                    
+                    <p style="font-size:20px; margin-top:50px;">
+                        Press SPACE when you are ready to begin.
+                    </p>
+                </div>
+            `;
+        },
+        choices: [' '],
+        response_ends_trial: true,
+        data: {
+            disp_type: 'instruction_trial'
+        }
+    };
+
+    // 3-5. Organize displays
     var image_and_isi = { 
         timeline: [img_disp, isi_if_needed],
         timeline_variables: frame_matrix,
@@ -413,14 +420,14 @@ Click the button below when you are ready to begin.
     }];
 
     var practice_trials = {
-        timeline: [image_and_isi],
+        timeline: [instruction_trial, image_and_isi],
         timeline_variables: practice_condition,
         randomize_order: false
     };
     
     for(r=1; r<=exp_blocks.length; r++){
         this['block'+(r)] = {
-            timeline: [image_and_isi, iti1, iti2],
+            timeline: [instruction_trial, image_and_isi],
             timeline_variables: exp_blocks[r-1],
             randomize_order: false
         }
@@ -614,19 +621,16 @@ Click the button below when you are ready to begin.
     // timeline.push(consent);
     // timeline.push(demographic_page);
     timeline.push(instruction_welcome);
-    timeline.push(instruction_prac);
     timeline.push(practice_trials);
     timeline.push(instruction_main);
-    timeline.push(iti1);
-    timeline.push(iti2);
-    timeline.push(block1);
-    timeline.push(break1);
-    timeline.push(block2);
-    timeline.push(break2);
-    timeline.push(block3);
-    timeline.push(break3);
-    timeline.push(block4);
-    timeline.push(break4);
+    // timeline.push(block1);
+    // timeline.push(break1);
+    // timeline.push(block2);
+    // timeline.push(break2);
+    // timeline.push(block3);
+    // timeline.push(break3);
+    // timeline.push(block4);
+    // timeline.push(break4);
     timeline.push(block5);
     timeline.push(break5);
     timeline.push(block6);

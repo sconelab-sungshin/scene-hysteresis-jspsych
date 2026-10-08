@@ -384,7 +384,37 @@ Click the button below when you are ready to begin.
         trial_duration: iti_dur2,
         data: {disp_type: 'ITI2'}
     };
-    // 3-4. Organize displays
+
+    // 3-4. Trial-specific instruction
+    var instruction_trial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: function() {
+            var att1 = jsPsych.timelineVariable('sub_att1');
+            var att2 = jsPsych.timelineVariable('sub_att2');
+
+            return `
+                <div style="text-align:center; font-family:Arial;">
+                    <p style="font-size:28px;">
+                        ${att1.toUpperCase()} vs. ${att2.toUpperCase()}
+                    </p>
+                    <p style="font-size:22px;">
+                        Judge whether each image is more
+                        ${att1} or ${att2}.
+                    </p>
+                    <p style="font-size:20px;">
+                        ${att1}: E &nbsp;&nbsp;&nbsp; ${att2}: I
+                    </p>
+                </div>
+            `;
+        },
+        choices: "NO_KEYS",
+        trial_duration: 3000,
+        data: {
+            disp_type: 'instruction_trial'
+        }
+    };
+
+    // 3-5. Organize displays
     var image_and_isi = { 
         timeline: [img_disp, isi_if_needed],
         timeline_variables: frame_matrix,
@@ -413,14 +443,14 @@ Click the button below when you are ready to begin.
     }];
 
     var practice_trials = {
-        timeline: [image_and_isi],
+        timeline: [instruction_trial, image_and_isi],
         timeline_variables: practice_condition,
         randomize_order: false
     };
     
     for(r=1; r<=exp_blocks.length; r++){
         this['block'+(r)] = {
-            timeline: [image_and_isi, iti1, iti2],
+            timeline: [instruction_trial, image_and_isi, iti1, iti2],
             timeline_variables: exp_blocks[r-1],
             randomize_order: false
         }
