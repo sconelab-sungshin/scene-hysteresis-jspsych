@@ -54,7 +54,7 @@
     };
     var history_dir = ['AtoB', 'BtoA', 'random'];    
     var img_per_seq = 9;
-    var rep_per_seq = 3;
+    var rep_per_seq = 5;
     var img_dur = 1200;
     var isi_dur = 800;
     var iti_dur1 = 1600;
@@ -173,6 +173,13 @@
                 }
             }
         }
+    }
+    // Preload practice images
+    for (var frame = 1; frame <= img_per_seq; frame++) {
+        var frame_str = String(frame).padStart(2, '0');
+        images.push(
+            `stimuli/recognition/foliage_flower_5/${frame_str}.png`
+        );
     }
     var preload_images = {
         type: jsPsychPreload, 
@@ -310,6 +317,34 @@ Click the button below when you are ready to begin.
         timeline_variables: frame_matrix,
         randomize_order: false
     };
+
+    // Practice condition
+    var practice_condition = [{
+        attribute: 'recognition',
+        sub_attribute: 'foliage_flower',
+        sub_att1: 'foliage',
+        sub_att2: 'flower',
+        history_dir: 'practice',
+        rep: 5,
+        image_path: [
+            'stimuli/recognition/foliage_flower_5/01.png',
+            'stimuli/recognition/foliage_flower_5/02.png',
+            'stimuli/recognition/foliage_flower_5/03.png',
+            'stimuli/recognition/foliage_flower_5/04.png',
+            'stimuli/recognition/foliage_flower_5/05.png',
+            'stimuli/recognition/foliage_flower_5/06.png',
+            'stimuli/recognition/foliage_flower_5/07.png',
+            'stimuli/recognition/foliage_flower_5/08.png',
+            'stimuli/recognition/foliage_flower_5/09.png'
+        ]
+    }];
+
+    var practice_trials = {
+        timeline: [image_and_isi],
+        timeline_variables: practice_condition,
+        randomize_order: false
+    };
+    
     for(r=1; r<=exp_blocks.length; r++){
         this['block'+(r)] = {
             timeline: [image_and_isi, iti1, iti2],
@@ -507,6 +542,7 @@ Click the button below when you are ready to begin.
     // timeline.push(demographic_page);
     timeline.push(instruction_welcome);
     timeline.push(instruction_prac);
+    timeline.push(practice_trials);
     timeline.push(instruction_main);
     timeline.push(iti1);
     timeline.push(iti2);
