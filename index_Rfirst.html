@@ -54,7 +54,7 @@
     };
     var history_dir = ['AtoB', 'BtoA', 'random'];    
     var img_per_seq = 9;
-    var rep_per_seq = 3;
+    var rep_per_seq = 5;
     var img_dur = 1200;
     var isi_dur = 800;
     var iti_dur1 = 1600;
@@ -70,17 +70,15 @@
         for (var j = 0; j < sub_attributes[current_attribute].length; j++) {
             var current_sub_attribute = sub_attributes[current_attribute][j];
             var current_sub_attribute_split = current_sub_attribute.split('_');
-            for (var k = 0; k < history_dir.length; k++) {
+            // AtoB & BtoA
+            for (var k = 0; k < 2; k++) {
                 var current_history_dir = history_dir[k];
                 for (var rep = 0; rep < rep_per_seq; rep++) { //each row under numeric index
                     // prepare image order
                     var image_order = [1, 2, 3, 4, 5, 6, 7, 8, 9];
                     if (current_history_dir === 'BtoA') {
                         image_order.reverse();
-                    }
-                    else if (current_history_dir === 'random') {
-                        image_order = _.shuffle(image_order);
-                    }                    
+                    }                  
                     // prepare image path
                     var image_path = image_order.map(function(img) {
                         var img_num = String(img).padStart(2, '0');
@@ -98,6 +96,50 @@
                     };
                     trial_idx++;
                 }
+            }
+            // Random:
+            // Each sequence contains levels 01–09 exactly once,
+            // while stimulus sets (_0–_4) are mixed across sequences.
+            
+            // For each level, shuffle the five sets
+            var shuffled_sets_by_level = {};
+            
+            for (var img = 1; img <= img_per_seq; img++) {
+                shuffled_sets_by_level[img] = _.shuffle([0, 1, 2, 3, 4]);
+            }
+            
+            // Make 5 random sequences
+            for (var random_seq = 0; random_seq < rep_per_seq; random_seq++) {
+            
+                var random_image_path = [];
+            
+                // Take one image from each level 01–09
+                for (var img = 1; img <= img_per_seq; img++) {
+            
+                    var img_num = String(img).padStart(2, '0');
+            
+                    // Select one of the five sets for this level
+                    var source_rep = shuffled_sets_by_level[img][random_seq];
+            
+                    random_image_path.push(
+                        `stimuli/${current_attribute}/${current_sub_attribute}_${source_rep}/${img_num}.png`
+                    );
+                }
+            
+                // Randomize presentation order of the 9 levels
+                random_image_path = _.shuffle(random_image_path);
+            
+                condition_matrix[current_attribute][trial_idx] = {
+                    attribute: current_attribute,
+                    sub_attribute: current_sub_attribute,
+                    sub_att1: current_sub_attribute_split[0],
+                    sub_att2: current_sub_attribute_split[1],
+                    history_dir: 'random',
+                    rep: random_seq,
+                    image_path: random_image_path
+                };
+            
+                trial_idx++;
             }
         }
     }
@@ -122,11 +164,11 @@
         // chunk trials
         condition_matrix_final[attr] = {
             non_random: [
-                non_random.slice(0, 9),
-                non_random.slice(9, 18)
+                non_random.slice(0, 15),
+                non_random.slice(15, 30)
             ],
             random: [
-                random.slice(0, 9)
+                random.slice(0, 15)
             ]
         };
     }
@@ -174,6 +216,13 @@
             }
         }
     }
+    // Preload practice images
+    for (var frame = 1; frame <= img_per_seq; frame++) {
+        var frame_str = String(frame).padStart(2, '0');
+        images.push(
+            `stimuli/recognition/foliage_flower_5/${frame_str}.png`
+        );
+    }
     var preload_images = {
         type: jsPsychPreload, 
         images: images
@@ -185,7 +234,14 @@
         stimulus: `
             <div style="max-width:1000px; margin:20px 50px; text-align:center; font-family:Arial, sans-serif;">
                 <h1 style="font-size:50px; font-weight:bold;">Welcome to the Study!</h1>
-                <p>TBU</p>
+                <p>In this study, you will view a series of images and make a judgment about each image.
+
+Each image will appear briefly on the screen. Please respond to every image by pressing either the E or I key, according to the response options shown on the screen.
+
+Please respond based on your immediate impression of each image. There are no right or wrong answers.
+
+Try to respond as accurately as possible while the image is displayed.
+</p>
                 </div>
                 <p style="font-size:22px;"> Click the button below to proceed </p>
             </div>`,
@@ -197,7 +253,16 @@
         stimulus: `
             <div style="max-width:1000px; margin:20px 50px; text-align:center; font-family:Arial, sans-serif;">
                 <h1 style="font-size:50px; font-weight:bold;">Practice Trials</h1>
-                <p>TBU</p>
+                <p>Before the main experiment, you will complete a short practice session.
+
+A series of images will be presented one at a time. For each image, choose the option that best matches your judgment by pressing the corresponding E or I key.
+
+The response options will be shown below each image.
+
+Please keep your fingers near the E and I keys and try to respond while each image is displayed.
+
+The practice trials are intended to help you become familiar with the task and response keys.
+</p>
                 </div>
                 <p style="font-size:22px;"> Click the button below to begin </p>
             </div>`,
@@ -209,7 +274,16 @@
         stimulus: `
             <div style="max-width:1000px; margin:20px 50px; text-align:center; font-family:Arial, sans-serif;">
                 <h1 style="font-size:50px; font-weight:bold;">Main Trials</h1>
-                <p>TBU</p>
+                <p>The main experiment will now begin.
+
+As in the practice session, images will be presented one at a time. For each image, press the E or I key according to the response options shown below the image.
+
+Please judge each image based on your immediate impression and respond while the image is displayed.
+
+There will be short breaks between rounds. Please remain focused throughout each round.
+
+Click the button below when you are ready to begin.
+</p>
                 </div>
                 <p style="font-size:22px;"> Click the button below to begin </p>
             </div>`,
@@ -223,15 +297,20 @@
     for (var i = 0; i < img_per_seq; i++) {
         frame_matrix.push({ frame_idx: i });
     }       
-    var img_disp = {
+        var img_disp = {
         type: jsPsychImageKeyboardResponse,
+    
         stimulus: function() {
             var paths = jsPsych.timelineVariable('image_path');
             var frame_idx = jsPsych.timelineVariable('frame_idx');
             return paths[frame_idx];
         },
+    
+        stimulus_width: 600,
         choices: ['e', 'i'],
         trial_duration: img_dur,
+        response_ends_trial: false,
+    
         prompt: function() {
             return `<p>
                 ${jsPsych.timelineVariable('sub_att1')}: e
@@ -239,15 +318,42 @@
                 ${jsPsych.timelineVariable('sub_att2')}: i
             </p>`;
         },
-        data: {
-            disp_type: 'image',
-            attribute: jsPsych.timelineVariable('attribute'),
-            sub_attribute: jsPsych.timelineVariable('sub_attribute'),
-            history_dir: jsPsych.timelineVariable('history_dir'),
-            rep: jsPsych.timelineVariable('rep'),
-            frame_idx: jsPsych.timelineVariable('frame_idx')
+    
+        data: function() {
+    
+            var paths = jsPsych.timelineVariable('image_path');
+            var frame_idx = jsPsych.timelineVariable('frame_idx');
+            var current_path = paths[frame_idx];
+    
+            // Extract actual stimulus set number
+            // e.g. dry_damp_3/07.png -> source_rep = 3
+            var source_rep_match = current_path.match(/_(\d+)\/\d{2}\.png$/);
+            var source_rep = source_rep_match
+                ? Number(source_rep_match[1])
+                : null;
+    
+            // Extract actual physical stimulus level
+            // e.g. dry_damp_3/07.png -> stim_level = 7
+            var stim_level_match = current_path.match(/\/(\d{2})\.png$/);
+            var stim_level = stim_level_match
+                ? Number(stim_level_match[1])
+                : null;
+    
+            return {
+                disp_type: 'image',
+                attribute: jsPsych.timelineVariable('attribute'),
+                sub_attribute: jsPsych.timelineVariable('sub_attribute'),
+                history_dir: jsPsych.timelineVariable('history_dir'),
+    
+                rep: jsPsych.timelineVariable('rep'),
+                source_rep: source_rep,
+                stim_level: stim_level,
+    
+                frame_idx: frame_idx
+            };
         }
     };
+    
     // 3-2. ISI display
     var isi = {
         type: jsPsychHtmlKeyboardResponse,
@@ -284,6 +390,34 @@
         timeline_variables: frame_matrix,
         randomize_order: false
     };
+
+    // Practice condition
+    var practice_condition = [{
+        attribute: 'recognition',
+        sub_attribute: 'foliage_flower',
+        sub_att1: 'foliage',
+        sub_att2: 'flower',
+        history_dir: 'practice',
+        rep: 5,
+        image_path: [
+            'stimuli/recognition/foliage_flower_5/01.png',
+            'stimuli/recognition/foliage_flower_5/02.png',
+            'stimuli/recognition/foliage_flower_5/03.png',
+            'stimuli/recognition/foliage_flower_5/04.png',
+            'stimuli/recognition/foliage_flower_5/05.png',
+            'stimuli/recognition/foliage_flower_5/06.png',
+            'stimuli/recognition/foliage_flower_5/07.png',
+            'stimuli/recognition/foliage_flower_5/08.png',
+            'stimuli/recognition/foliage_flower_5/09.png'
+        ]
+    }];
+
+    var practice_trials = {
+        timeline: [image_and_isi],
+        timeline_variables: practice_condition,
+        randomize_order: false
+    };
+    
     for(r=1; r<=exp_blocks.length; r++){
         this['block'+(r)] = {
             timeline: [image_and_isi, iti1, iti2],
@@ -481,6 +615,7 @@
     // timeline.push(demographic_page);
     timeline.push(instruction_welcome);
     timeline.push(instruction_prac);
+    timeline.push(practice_trials);
     timeline.push(instruction_main);
     timeline.push(iti1);
     timeline.push(iti2);
