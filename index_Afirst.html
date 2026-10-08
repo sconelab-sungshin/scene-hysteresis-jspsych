@@ -265,6 +265,7 @@ Click the button below when you are ready to begin.
         stimulus_width: 600,
         choices: ['e', 'i'],
         trial_duration: img_dur,
+        response_ends_trial: false,
         prompt: function() {
             return `<p>
                 ${jsPsych.timelineVariable('sub_att1')}: e
