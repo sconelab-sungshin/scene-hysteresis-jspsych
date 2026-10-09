@@ -50,15 +50,15 @@
     var second_attribute = 'recognition';        
     var sub_attributes = {
         recognition: ['foliage_flower', 'wood_stone', 'cloudy_sunny'],
-        action: ['soil_ice', 'dry_damp', 'walkable_notwalkable']
+        action: ['soil_ice', 'dry_damp', 'walkable_not-walkable']
     };
     var history_dir = ['AtoB', 'BtoA', 'random'];    
     var img_per_seq = 9;
-    var rep_per_seq = 5;
+    var rep_per_seq = 3;
     var img_dur = 1200;
     var isi_dur = 800;
-    var iti_dur1 = 1600;
-    var iti_dur2 = 800;
+    // var iti_dur1 = 1600;
+    // var iti_dur2 = 800;
     var trial_per_block = 9
 
     // 2. Make basic condition matrix
@@ -99,16 +99,16 @@
             }
             // Random:
             // Each sequence contains levels 01–09 exactly once,
-            // while stimulus sets (_0–_4) are mixed across sequences.
+            // while stimulus sets are mixed across sequences.
             
             // For each level, shuffle the five sets
             var shuffled_sets_by_level = {};
             
             for (var img = 1; img <= img_per_seq; img++) {
-                shuffled_sets_by_level[img] = _.shuffle([0, 1, 2, 3, 4]);
+                shuffled_sets_by_level[img] = _.shuffle(_.range(rep_per_seq));
             }
             
-            // Make 5 random sequences
+            // Make random sequences
             for (var random_seq = 0; random_seq < rep_per_seq; random_seq++) {
             
                 var random_image_path = [];
@@ -173,10 +173,10 @@
         };
     }
     var exp_blocks = [
-        // first attribute:non-random
+        // non-random: first attribute
         condition_matrix_final[first_attribute].non_random[0],
         condition_matrix_final[first_attribute].non_random[1],
-        // second attribute: non-random
+        // non-random: second attribute
         condition_matrix_final[second_attribute].non_random[0],
         condition_matrix_final[second_attribute].non_random[1],
         // random
@@ -202,7 +202,7 @@
     var images = [];
     var stim_folders = {
         recognition: ['foliage_flower', 'wood_stone', 'cloudy_sunny'],
-        action: ['soil_ice', 'dry_damp', 'walkable_notwalkable']
+        action: ['soil_ice', 'dry_damp', 'walkable_not-walkable']
     };    
     for (var attribute in stim_folders) {
         for (var sub_attribute of stim_folders[attribute]) {
@@ -220,7 +220,13 @@
     for (var frame = 1; frame <= img_per_seq; frame++) {
         var frame_str = String(frame).padStart(2, '0');
         images.push(
-            `stimuli/recognition/foliage_flower_5/${frame_str}.png`
+            `stimuli/practice/foliage_flower_5/${frame_str}.png`
+        );
+    }
+    for (var frame = 1; frame <= img_per_seq; frame++) {
+        var frame_str = String(frame).padStart(2, '0');
+        images.push(
+            `stimuli/practice/concrete_ice_3/${frame_str}.png`
         );
     }
     var preload_images = {
@@ -234,11 +240,10 @@
         stimulus: `
             <div style="max-width:1000px; margin:20px 50px; text-align:center; font-family:Arial, sans-serif;">
                 <h1 style="font-size:50px; font-weight:bold;">Welcome to the Study!</h1>
-                <p>In this study, you will view a series of images and judge each one by pressing E or I. 
-                    <br>The response options will be shown on the screen.
-                </p>
-                <p>Images will appear rapidly. Please respond while each image is on the screen, based on your immediate impression.
-                    <br>There are no right or wrong answers.
+                <p>In this study, you will see a series of images that vary continuously between two visual attributes. 
+                    <br>For each image, decide which attribute better describes the <b>overall appearance</b> of the image.
+                    <br>Please make your judgment based on the overall appearance of the image, 
+                    <br>rather than simply whether an attribute is present or absent.
                 </p>
                 </div>
                 <p> Click the button below to start the practice session.</p>
@@ -246,6 +251,26 @@
         choices: ['Proceed'],
         data: {disp_type: 'instruction_welcome'}
     }
+
+    var instruction_practice = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `
+            <div style="max-width:1000px; margin:20px 50px; text-align:center; font-family:Arial, sans-serif;">
+                <h1 style="font-size:50px; font-weight:bold;">Practice Session</h1>
+                <p>In this practice, you will see two sets of images that vary continuously between two visual attributes.
+                  <br>For each image, decide which attribute better describes the <b>overall appearance</b> of the image 
+                  <br>by pressing either the <b>E or I key</b>, as indicated on the screen.
+                </p>
+                <p> Each image will appear only briefly.
+                    <br>Please respond while the image is still on the screen, based on your immediate impression.
+                    <br>There are no right or wrong answers.
+                </p>
+                </div>
+                <p style="font-size:22px;"> Click the button below to begin </p>
+            </div>`,
+        choices: ['Start'],
+        data: {disp_type: 'instruction_main'}
+    } 
     
     var instruction_main = {
         type: jsPsychHtmlButtonResponse,
@@ -253,17 +278,27 @@
             <div style="max-width:1000px; margin:20px 50px; text-align:center; font-family:Arial, sans-serif;">
                 <h1 style="font-size:50px; font-weight:bold;">Main Trials</h1>
                 <p>The main experiment will now begin.
-                  <br>As in the practice session, images will be presented one at a time. 
-                  <br>For each image, press the E or I key according to the response options shown below the image.
+                  <br>As in the practice session, press the <b>E or I key</b> according to the response options shown below the image.
+                  <br>Please judge each image based on your immediate impression and respond while the image is displayed.
                 </p>
-                <p>Please judge each image based on your immediate impression and respond while the image is displayed.
-                    <br>There will be short breaks between rounds. Please remain focused throughout each round.
-                <p>
-                </div>
+                <p>There will be 6 rounds in total. Short breaks will given between rounds.</p>
                 <p style="font-size:22px;"> Click the button below to begin </p>
             </div>`,
         choices: ['Start'],
         data: {disp_type: 'instruction_main'}
+    }
+
+    var instruction_main_random = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `
+            <div style="max-width:1000px; margin:20px 50px; text-align:center; font-family:Arial, sans-serif;">
+                <p>In the next two rounds, images may appear in a different order.
+                    <br>As before, decide which attribute better describes the overall appearance of each image.
+                    <br>Please respond while each image is still on the screen, based on your immediate impression.
+                </p>
+            </div>`,
+        choices: ['Start'],
+        data: {disp_type: 'instruction_main_random'}
     } 
 
     // 3. Prepare trial sequence
@@ -344,21 +379,21 @@
             return frame_idx < img_per_seq - 1;
         }
     };
-    // 3-3. ITI display
-    var iti1 = {
-        type: jsPsychHtmlKeyboardResponse,
-        stimulus: '<p style="font-size: 48px; color: grey;">+</p>',
-        choices: "NO_KEYS",
-        trial_duration: iti_dur1,
-        data: {disp_type: 'ITI1'}
-    };
-    var iti2 = {
-        type: jsPsychHtmlKeyboardResponse,
-        stimulus: '<p style="font-size: 48px; color: red;">+</p>',
-        choices: "NO_KEYS",
-        trial_duration: iti_dur2,
-        data: {disp_type: 'ITI2'}
-    };
+    // // 3-3. ITI display
+    // var iti1 = {
+    //     type: jsPsychHtmlKeyboardResponse,
+    //     stimulus: '<p style="font-size: 48px; color: grey;">+</p>',
+    //     choices: "NO_KEYS",
+    //     trial_duration: iti_dur1,
+    //     data: {disp_type: 'ITI1'}
+    // };
+    // var iti2 = {
+    //     type: jsPsychHtmlKeyboardResponse,
+    //     stimulus: '<p style="font-size: 48px; color: red;">+</p>',
+    //     choices: "NO_KEYS",
+    //     trial_duration: iti_dur2,
+    //     data: {disp_type: 'ITI2'}
+    // };
 
     // 3-4. Trial-specific instruction
     var instruction_trial = {
@@ -399,35 +434,56 @@
     };
 
     // Practice condition
-    var practice_condition = [{
-        attribute: 'recognition',
-        sub_attribute: 'foliage_flower',
-        sub_att1: 'foliage',
-        sub_att2: 'flower',
-        history_dir: 'practice',
-        rep: 5,
-        image_path: [
-            'stimuli/recognition/foliage_flower_5/01.png',
-            'stimuli/recognition/foliage_flower_5/02.png',
-            'stimuli/recognition/foliage_flower_5/03.png',
-            'stimuli/recognition/foliage_flower_5/04.png',
-            'stimuli/recognition/foliage_flower_5/05.png',
-            'stimuli/recognition/foliage_flower_5/06.png',
-            'stimuli/recognition/foliage_flower_5/07.png',
-            'stimuli/recognition/foliage_flower_5/08.png',
-            'stimuli/recognition/foliage_flower_5/09.png'
-        ]
-    }];
+    var practice_condition = [
+        {
+            attribute: 'recognition',
+            sub_attribute: 'foliage_flower',
+            sub_att1: 'foliage',
+            sub_att2: 'flower',
+            history_dir: 'practice',
+            rep: 1,
+            image_path: [
+                'stimuli/practice/foliage_flower_5/01.png',
+                'stimuli/practice/foliage_flower_5/02.png',
+                'stimuli/practice/foliage_flower_5/03.png',
+                'stimuli/practice/foliage_flower_5/04.png',
+                'stimuli/practice/foliage_flower_5/05.png',
+                'stimuli/practice/foliage_flower_5/06.png',
+                'stimuli/practice/foliage_flower_5/07.png',
+                'stimuli/practice/foliage_flower_5/08.png',
+                'stimuli/practice/foliage_flower_5/09.png'
+            ]
+        },
+        {
+           attribute: 'action',
+            sub_attribute: 'concrete_ice',
+            sub_att1: 'concrete',
+            sub_att2: 'ice',
+            history_dir: 'practice',
+            rep: 1,
+            image_path: [
+                'stimuli/practice/concrete_ice_3/09.png',
+                'stimuli/practice/concrete_ice_3/08.png',
+                'stimuli/practice/concrete_ice_3/07.png',
+                'stimuli/practice/concrete_ice_3/06.png',
+                'stimuli/practice/concrete_ice_3/05.png',
+                'stimuli/practice/concrete_ice_3/04.png',
+                'stimuli/practice/concrete_ice_3/03.png',
+                'stimuli/practice/concrete_ice_3/02.png',
+                'stimuli/practice/concrete_ice_3/01.png'
+            ] 
+        }
+    ];
 
     var practice_trials = {
-        timeline: [instruction_trial, image_and_isi],
+        timeline: [instruction_trial, isi, image_and_isi],
         timeline_variables: practice_condition,
         randomize_order: false
     };
     
     for(r=1; r<=exp_blocks.length; r++){
         this['block'+(r)] = {
-            timeline: [instruction_trial, image_and_isi],
+            timeline: [instruction_trial, isi, image_and_isi],
             timeline_variables: exp_blocks[r-1],
             randomize_order: false
         }
@@ -619,18 +675,20 @@
     // });
     timeline.push(preload_images);
     // timeline.push(consent);
-    // timeline.push(demographic_page);
+    timeline.push(demographic_page);
     timeline.push(instruction_welcome);
+    timeline.push(instruction_practice);
     timeline.push(practice_trials);
     timeline.push(instruction_main);
-    // timeline.push(block1);
-    // timeline.push(break1);
-    // timeline.push(block2);
-    // timeline.push(break2);
-    // timeline.push(block3);
-    // timeline.push(break3);
-    // timeline.push(block4);
-    // timeline.push(break4);
+    timeline.push(block1);
+    timeline.push(break1);
+    timeline.push(block2);
+    timeline.push(break2);
+    timeline.push(block3);
+    timeline.push(break3);
+    timeline.push(block4);
+    timeline.push(break4);
+    timeline.push(instruction_main_random)
     timeline.push(block5);
     timeline.push(break5);
     timeline.push(block6);
